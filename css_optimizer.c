@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "css_optimizer.h"
 
+// Lectrure des fichiers sources
 struct_css *lecture (FILE *fichier, char *chemin) {
     struct_chaine *balise = NULL, *regle = NULL;
     fichier = fopen(chemin, "r");
@@ -10,6 +11,7 @@ struct_css *lecture (FILE *fichier, char *chemin) {
     t_list *tmp = creation_liste(1), *tmp_chaine = creation_liste(1), *tmp_struct_chaine = creation_liste(1), *tmp_balise = NULL, *tmp_regles = NULL;
     if (fichier != NULL) {
         do {
+			// Verification si on est dans un commentaire
             curseur_actuel = fgetc(fichier);
             if (curseur_actuel == '*' && curseur_precedent == '/')
             	commentaire = 1;
@@ -18,6 +20,7 @@ struct_css *lecture (FILE *fichier, char *chemin) {
             curseur_precedent = curseur_actuel;
             if (commentaire == 1 || curseur_actuel == '/')
             	continue;
+			// Tri des elements du fichier (balises et proprietes)
             if (curseur_actuel == '{') {
             	tmp_balise = creation_liste(tmp_struct_chaine->longueur);           	
             	for (i=0; i<tmp_struct_chaine->longueur; i++) {
@@ -30,18 +33,20 @@ struct_css *lecture (FILE *fichier, char *chemin) {
             	}
 				tmp_struct_chaine->longueur = 0;
                 balise = NULL;
+				// Separation des elements trouves
                 for (i=0; i<tmp_chaine->longueur; i++) {
                     if (tmp_chaine->elements[i] == ',') {
                         balise = ajout_chaine(balise, tmp->elements);
                         tmp = creation_liste(1);
                         continue;
                     }
-                    ajout_liste(tmp, tmp_chaine->elements[i]);                            
+                    ajout_liste(tmp, tmp_chaine->elements[i]);                        
                 }
                 balise = ajout_chaine(balise, tmp->elements);
                 tmp = creation_liste(1);
                 tmp_chaine = creation_liste(1);                     
             }
+			// Fin des proprietes
             if (curseur_actuel == '}') {
              	tmp_regles = creation_liste(tmp_struct_chaine->longueur);
             	for (i=0; i<tmp_struct_chaine->longueur; i++) {
@@ -63,40 +68,47 @@ struct_css *lecture (FILE *fichier, char *chemin) {
                     ajout_liste(tmp, tmp_chaine->elements[i]);                            
                 }                
                 tmp = creation_liste(1);
-                tmp_chaine = creation_liste(1);     
+                tmp_chaine = creation_liste(1);
+				// Ajout des balises et proprietes dans css     
                 css=css_ajout(css, regle, balise);
             }
             if (curseur_actuel != EOF)
-            ajout_liste(tmp_struct_chaine, curseur_actuel);
+            	ajout_liste(tmp_struct_chaine, curseur_actuel);
         } while (curseur_actuel != EOF);
-        return css;
+        // Ceci tant qu'il y a un element dans le fichier 
+		return css;
     }
     else return NULL;
 }
 
+// Verification si on a -b ou -h
 int verif_option (int argc, char **argv, int *verif_b) {
     int i, j=1;
-        for (i=1; i<argc; i++) {
-		    if (chaine_comparaison(argv[i], "-b") == 1) {
-		        *verif_b = 1;
-				j++;
+	// On regarde tous les elements entres en ligne de commande
+    for (i=1; i<argc; i++) {
+		// Si on un -b
+		if (chaine_comparaison(argv[i], "-b") == 1) {
+			*verif_b = 1;
+			j++;
         }
-        if (chaine_comparaison(argv[i], "-h") == 1) {
-            printf("\nNAME\n"
-                "    css_optimize - Reads css files and optimizes it in the new css file\n\n"
+		// Si on un -h
+		if (chaine_comparaison(argv[i], "-h") == 1) {
+			printf("\nNAME\n"
+		    	"    css_optimize - Reads css files and optimizes it in the new css file\n\n"
 				"SYNOPSIS\n"
 				"    css_optimize [OPTION] [SOURCES ...] [DESTINATION]\n\n"
 				"DESCRIPTION\n"
-                "    -b, --beautify\n"
-                "        Reads css files, optimizes and formates it in the new css file\n"
-                "    -h, --help\n"
-                "        Displays this help\n\n");    
-            return 0;  
+		        "    -b, --beautify\n"
+		        "        Reads css files, optimizes and formates it in the new css file\n"
+		       	"    -h, --help\n"
+		        "        Displays this help\n\n");    
+		  	return 0;  
         }
     }
     return j;
 }
 
+// Permet de determiner la taille d'un element dans la memoire
 char *allocation (char *chaine) {
 	char *nouvelle_chaine;
 	if (chaine) {
@@ -107,6 +119,7 @@ char *allocation (char *chaine) {
 	return NULL;
 }
 
+// Calcul la taille d'une chaine
 int chaine_longueur (char *chaine) {
 	int cpt = 0;	
 	if (chaine) {
@@ -119,6 +132,7 @@ int chaine_longueur (char *chaine) {
 	}
 }
 
+// Permet de comparer 2 chaines
 int chaine_comparaison (char *chaine1, char *chaine2) {
 	int cpt = 0;
 	if (!chaine1) {
@@ -137,6 +151,7 @@ int chaine_comparaison (char *chaine1, char *chaine2) {
 	return 1;
 }
 
+// Comparaison des proprietes
 int chaine_propriete (char *propriete1, char *propriete2) {
 	int i;
 	t_list *tmp1 = creation_liste(1), *tmp2 = creation_liste(1);
@@ -149,6 +164,7 @@ int chaine_propriete (char *propriete1, char *propriete2) {
 	return 0;
 }
 
+// Creation liste chainee basique
 struct_chaine *creation_chaine (char *chaine) {
 	struct_chaine * tmp = malloc(sizeof(struct_chaine));
 	tmp->chaine = chaine;
@@ -156,17 +172,19 @@ struct_chaine *creation_chaine (char *chaine) {
 	return tmp;
 }
 
+// Ajout sur une chaine
 struct_chaine *ajout_chaine (struct_chaine *liste, char *chaine) {
 	if (!liste)
         return (struct_chaine*)creation_chaine(chaine);
    	struct_chaine *tmp;
-    	tmp = liste;
+    tmp = liste;
    	while (tmp->next != NULL)
     	tmp = tmp->next;
     tmp->next = creation_chaine(chaine);
     return liste;
 }
 
+// Concatenation d'un maillon dans la liste chaine
 struct_chaine *concat_chaine (struct_chaine *source1, struct_chaine *source2) {
 	struct_chaine *tmp1 = NULL, *tmp2 = NULL;
 	if (source1) {
@@ -185,6 +203,7 @@ struct_chaine *concat_chaine (struct_chaine *source1, struct_chaine *source2) {
 	return source1;
 }
 
+// Compare 2 maillons
 int chaine_comp (struct_chaine *source1, struct_chaine *source2) {
 	if (chaine_longueur_liste(source1) != chaine_longueur_liste(source2))
 		return 0;
@@ -203,6 +222,7 @@ int chaine_comp (struct_chaine *source1, struct_chaine *source2) {
 	else return 1;
 }
 
+// Determine la longueur d'une liste
 int chaine_longueur_liste (struct_chaine *liste) {
 	struct_chaine *tmp;
 	tmp = liste;
@@ -215,6 +235,7 @@ int chaine_longueur_liste (struct_chaine *liste) {
 	return cpt;
 }
 
+// Recherche une chaine dans une liste
 int chaine_recherche (struct_chaine *liste, char *chaine) {
 	struct_chaine *tmp = liste;
 	int cpt = 0;
@@ -229,6 +250,7 @@ int chaine_recherche (struct_chaine *liste, char *chaine) {
 	return -1;
 }
 
+// Supprime la chaine se trouvant a la position souhaitee
 struct_chaine *supprime_chaine (struct_chaine *liste, int position) {
 	if (0 <= position && chaine_longueur_liste(liste) > position) {	
 		int cpt=0;
@@ -249,6 +271,7 @@ struct_chaine *supprime_chaine (struct_chaine *liste, int position) {
 	return liste;
 }
 
+// Cherche propriete dans liste
 int chaine_cherche_propriete (struct_chaine *liste, char *chaine) {
 	struct_chaine *tmp;
 	tmp = liste;
@@ -264,6 +287,7 @@ int chaine_cherche_propriete (struct_chaine *liste, char *chaine) {
 	return -1;
 }
 
+// Creation d'un maillon avec les caracteristiques d'une balise css (nom + proprietes)
 struct_css *css_creation (struct_chaine *propriete, struct_chaine *balise) {
 	struct_css *tmp = malloc(sizeof(struct_css));
 	tmp->propriete = propriete;
@@ -272,6 +296,7 @@ struct_css *css_creation (struct_chaine *propriete, struct_chaine *balise) {
 	return tmp;
 }
 
+// Ajout d'un element a la fin de la liste css
 struct_css *css_fusion (struct_css *contenu, struct_css *ajout) {
 	while (contenu->next != NULL)
     	contenu=contenu->next;
@@ -279,6 +304,7 @@ struct_css *css_fusion (struct_css *contenu, struct_css *ajout) {
    	return contenu;
 }
 
+// Ajout d'un maillon avec les caracteriqtiques de la balise
 struct_css *css_ajout (struct_css *liste, struct_chaine *propriete, struct_chaine *balise) {
 	if (!liste)
         return (struct_css*)css_creation(propriete, balise);
@@ -289,6 +315,7 @@ struct_css *css_ajout (struct_css *liste, struct_chaine *propriete, struct_chain
     return liste;
 }
 
+// Optimisation des balises de maniere generale
 struct_css *css_optimisation (struct_css *css) {
 	struct_css *optimisation = NULL, *tmp = css;
    	while (tmp->next != NULL) {
@@ -299,6 +326,7 @@ struct_css *css_optimisation (struct_css *css) {
 	return optimisation;
 }
 
+// Optimisation des balises bloc par bloc
 struct_css *css_optimisation_bloc (struct_css *css, struct_css *optimisation) {
 	struct_chaine *tmp;
    	tmp = css->propriete;
@@ -310,6 +338,7 @@ struct_css *css_optimisation_bloc (struct_css *css, struct_css *optimisation) {
 	return optimisation;
 }
 
+// Optimisation des proprietes des balises
 struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisation, char *propriete) {
 	struct_chaine *balises = NULL;
  	balises = concat_chaine (balises, css->balise);
@@ -317,6 +346,7 @@ struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisatio
 	struct_css *tmp = css->next;
 	if (tmp) {
 		while (tmp->next != NULL) {
+			// Retire les doublons
 			recherche = chaine_recherche(tmp->propriete, propriete);
 			if (recherche != -1) {
 				balises = concat_chaine (balises, tmp->balise);
@@ -324,6 +354,7 @@ struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisatio
 			}
 			tmp = tmp->next;
 		}
+		// Retire le doublon s'il est sur le dernier maillon
 		recherche = chaine_recherche(tmp->propriete, propriete);
 		if (recherche != -1) {
 			balises = concat_chaine (balises, tmp->balise);
@@ -332,6 +363,7 @@ struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisatio
 	}	
 	tmp = optimisation;
 	if (optimisation) {
+		// Supprime les doublons de balises avec les contenus
 		while (tmp->next != NULL) {
 			cmp = chaine_comp(balises, tmp->balise);
 			if (cmp) {
@@ -354,8 +386,10 @@ struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisatio
 	return optimisation;
 }
 
+// Ecriture des balises optimisees dans le fichier destination
 void css_ecriture_fichier (struct_css *css, char *nom_fichier, int option) {
 	if (css) {
+		// Verifie si la creation du fichier destination s'effectue bien
 		FILE *fichier = fopen(nom_fichier, "w");
 		if (fichier == NULL) {
 			printf("\nThere is a problem with the creation of your destination file\n\n");
@@ -364,8 +398,9 @@ void css_ecriture_fichier (struct_css *css, char *nom_fichier, int option) {
 		struct_css *tmp1 = css;
 		struct_chaine *tmp2;
 	    while (tmp1->next != NULL) {
-			tmp2 = tmp1->balise;			
+			tmp2 = tmp1->balise;	
 			while (tmp2->next != NULL) {
+				// Ecriture des balises
 				fputs(tmp2->chaine, fichier);
 				fputc(',', fichier);
 				tmp2 = tmp2->next;
@@ -376,6 +411,7 @@ void css_ecriture_fichier (struct_css *css, char *nom_fichier, int option) {
 			fputc('{', fichier);
 			if (option ==1 )
 				fputc('\n', fichier);
+			// Ecriture des proprietes
 			tmp2 = tmp1->propriete;
 			while (tmp2->next != NULL) {
 				if (option == 1)
@@ -397,6 +433,7 @@ void css_ecriture_fichier (struct_css *css, char *nom_fichier, int option) {
 				fputc('\n', fichier);		
 			tmp1 = tmp1->next;
 		}
+		// Pour le derneir element
 	  	tmp2 = tmp1->balise;
 	  	while (tmp2->next != NULL) {
 			fputs(tmp2->chaine, fichier );
@@ -432,6 +469,7 @@ void css_ecriture_fichier (struct_css *css, char *nom_fichier, int option) {
 	else return ;
 }
 
+// Creation et initialisation de la liste
 t_list *creation_liste (int max) {
     t_list *liste = malloc(sizeof(t_list));
     liste->elements = malloc(sizeof(int)*max);
@@ -440,6 +478,7 @@ t_list *creation_liste (int max) {
 	return liste;
 }
 
+// Ajoute caracteres dans la liste
 void ajout_liste (t_list *liste, char valeur) {
     int i;
     if (liste->longueur == liste->max) {

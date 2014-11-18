@@ -1,0 +1,14 @@
+h2 {
+	background-color : red;
+	color : yellow;
+	position : relative;
+	left : 55px;
+	top : 10px;
+}
+/* Commentaire */
+span {
+	position : fixed;
+	right : 0px;
+	bottom : 0px;
+}
+

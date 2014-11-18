@@ -1,20 +1,24 @@
+// Structure pour ranger chaine recuperee
 typedef struct struct_chaine {
 	char *chaine;
 	struct struct_chaine *next;
 } struct_chaine;
 
+// Structrure pour ranger les chaines triees par type
 typedef struct struct_css {
 	struct_chaine *propriete;
 	struct_chaine *balise;
 	struct struct_css *next;
 } struct_css;
 
+// Liste pour ranger les elements
 typedef struct s_list {
 	char *elements ;
 	int longueur;
 	int max;
 } t_list;
 
+// Prototypes
 struct_css *lecture (FILE *fichier, char *chemin);
 int verif_option (int argc, char **argv, int *verif_b);
 t_list *creation_liste (int max); 
