@@ -37,6 +37,6 @@ int main (int argc, char **argv)
     css = css_optimisation (css);
 	// Ecriture dans le fichier destination des elements rangés
 	css_ecriture_fichier (css, argv[argc-1], *verif_b);
-	printf("\nYour optimization is finished correctly\n\n");
+	printf("\nYour optimization has finished correctly\n\n");
 	return 0;
 }

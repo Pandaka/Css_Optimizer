@@ -94,9 +94,9 @@ int verif_option (int argc, char **argv, int *verif_b) {
 		// Si on un -h
 		if (chaine_comparaison(argv[i], "-h") == 1) {
 			printf("\nNAME\n"
-		    	"    css_optimize - Reads css files and optimizes it in the new css file\n\n"
+		    	"    css_optimizer - Reads css files and optimizes it in the new css file\n\n"
 				"SYNOPSIS\n"
-				"    css_optimize [OPTION] [SOURCES ...] [DESTINATION]\n\n"
+				"    css_optimizer [OPTION] [SOURCES ...] [DESTINATION]\n\n"
 				"DESCRIPTION\n"
 		        "    -b, --beautify\n"
 		        "        Reads css files, optimizes and formates it in the new css file\n"
@@ -275,15 +275,17 @@ struct_chaine *supprime_chaine (struct_chaine *liste, int position) {
 int chaine_cherche_propriete (struct_chaine *liste, char *chaine) {
 	struct_chaine *tmp;
 	tmp = liste;
-	int cpt = 0;
-	while (tmp->next != NULL) {
+	if (liste) {
+		int cpt = 0;
+		while (tmp->next != NULL) {
+			if (chaine_propriete(chaine, tmp->chaine))
+				return cpt;	
+			cpt++;
+			tmp = tmp->next;
+		}
 		if (chaine_propriete(chaine, tmp->chaine))
-			return cpt;	
-		cpt++;
-	    tmp = tmp->next;
+			return cpt;
 	}
-	if (chaine_propriete(chaine, tmp->chaine))
-		return cpt;
 	return -1;
 }
 
@@ -330,11 +332,13 @@ struct_css *css_optimisation (struct_css *css) {
 struct_css *css_optimisation_bloc (struct_css *css, struct_css *optimisation) {
 	struct_chaine *tmp;
    	tmp = css->propriete;
-   	while (tmp->next != NULL) {
+	if (tmp) {
+	   	while (tmp->next != NULL) {
+			optimisation = css_optimisation_propriete(css, optimisation, tmp->chaine);
+		 	tmp = tmp->next;
+	   	}
 		optimisation = css_optimisation_propriete(css, optimisation, tmp->chaine);
-     	tmp = tmp->next;
-   	}
-	optimisation = css_optimisation_propriete(css, optimisation, tmp->chaine);
+	}
 	return optimisation;
 }
 
@@ -364,20 +368,22 @@ struct_css *css_optimisation_propriete (struct_css *css, struct_css *optimisatio
 	tmp = optimisation;
 	if (optimisation) {
 		// Supprime les doublons de balises avec les contenus
-		while (tmp->next != NULL) {
-			cmp = chaine_comp(balises, tmp->balise);
-			if (cmp) {
-				tmp->propriete = supprime_chaine(tmp->propriete, chaine_cherche_propriete(tmp->propriete, propriete));
-				tmp->propriete = ajout_chaine(tmp->propriete, allocation(propriete));		
-				break;
-			}
-			tmp = tmp->next;
-		}	
-		if (!cmp) {
-			cmp = chaine_comp(balises, tmp->balise);
-			if (cmp) {
-				tmp->propriete = supprime_chaine(tmp->propriete, chaine_cherche_propriete(tmp->propriete, propriete));
-				tmp->propriete = ajout_chaine(tmp->propriete, allocation(propriete));		
+		if (tmp) {
+			while (tmp->next != NULL) {
+				cmp = chaine_comp(balises, tmp->balise);
+				if (cmp) {
+					tmp->propriete = supprime_chaine(tmp->propriete, chaine_cherche_propriete(tmp->propriete, propriete));
+					tmp->propriete = ajout_chaine(tmp->propriete, allocation(propriete));		
+					break;
+				}
+				tmp = tmp->next;
+			}	
+			if (!cmp) {
+				cmp = chaine_comp(balises, tmp->balise);
+				if (cmp) {
+					tmp->propriete = supprime_chaine(tmp->propriete, chaine_cherche_propriete(tmp->propriete, propriete));
+					tmp->propriete = ajout_chaine(tmp->propriete, allocation(propriete));		
+				}
 			}
 		}
 	}
