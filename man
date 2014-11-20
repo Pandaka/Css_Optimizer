@@ -1,0 +1,19 @@
+.\" Manpage for css_optimizer
+.TH man 1 "November 2014" "1.0" "css_optimizer man page"
+.SH NAME
+css_optimizer \- Reads css files and optimizes it in the new css file
+.SH SYNOPSIS
+css_optimize [OPTION] [SOURCES ...] [DESTINATION]
+.SH DESCRIPTION
+Create css files and the program reads these css files, optimizes and formates them in the new css file
+.SH OPTIONS
+.TP
+-b, --beautify
+Reads css files, optimizes and formates it in the new css file
+.TP
+-h, --help
+Displays this help
+.SH EXAMPLE
+css_optimizer mycss1.css mycss2.css result.css
+.SH AUTHOR
+Writen by Bouchevereau Charley, Bonnin Anthony and Cailleau Tristan
